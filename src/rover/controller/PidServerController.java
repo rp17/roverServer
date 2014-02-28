@@ -2,18 +2,28 @@ package rover.controller;
 
 import rover.Main;
 import rover.server.PIDServer;
+import rover.server.UpdateServer;
 import rover.ui.PidServerFrame;
 
 public class PidServerController {
 	private PidServerFrame frame;
-	private PIDServer server;
-	private boolean remote = false;
+	public static PIDServer server;
+	public static UpdateServer updateServer;
+	public static boolean remote = false;
+	private static int speed;
 	
 	public void setView(PidServerFrame frame) {this.frame = frame;}
 	public void setServer(PIDServer server) {this.server = server;}
+	public void setUpdateServer(UpdateServer server) {this.updateServer = server;}
+	
 	public void operation(String op) {
+		
+		// retrieve desired speed from rover.ui speed textbox
+		speed = Integer.parseInt(frame.getSpeedText());
+				
 		if(op == PidServerFrame.Close) {
 			server.closeServer();
+			updateServer.closeServer();
 			Main.shutdown();
 		}
 		else if(op == PidServerFrame.Remote) {
@@ -25,16 +35,19 @@ public class PidServerController {
 			remote = false;
 		}
 		else if(op == PidServerFrame.Forward) {
-			if(remote) server.sendCmd(1);
+			if(remote) server.sendCmd(1, speed);
 		}
 		else if(op == PidServerFrame.Backward) {
-			if(remote) server.sendCmd(2);
+			if(remote) server.sendCmd(2, speed);
 		}
 		else if(op == PidServerFrame.Left) {
-			if(remote) server.sendCmd(3);
+			if(remote) server.sendCmd(3, speed);
 		}
 		else if(op == PidServerFrame.Right) {
-			if(remote) server.sendCmd(4);
+			if(remote) server.sendCmd(4, speed);
+		}
+		else if(op == PidServerFrame.Stop) {
+			if(remote) server.sendCmd(5);
 		}
 	}
 	

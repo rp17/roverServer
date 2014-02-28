@@ -2,6 +2,7 @@ package rover;
 
 import rover.controller.PidServerController;
 import rover.server.PIDServer;
+import rover.server.UpdateServer;
 import rover.ui.PidServerFrame;
 
 import javax.swing.SwingUtilities;
@@ -15,8 +16,11 @@ import java.util.concurrent.locks.Condition;
 public class Main {
 	static PidServerController pidServerController;
 	static PIDServer pidServer;
+	static UpdateServer updateServer;
 	static PidServerFrame pidServerFrame;
 	private static final ExecutorService singleServerPool = Executors.newSingleThreadExecutor();
+	private static final ExecutorService singleUpdaterPool = Executors.newSingleThreadExecutor();
+
 	/**
 	 * @param args
 	 */
@@ -28,8 +32,14 @@ public class Main {
 		    	  pidServerFrame = new PidServerFrame(pidServerController);
 		    	  pidServerController.setView(pidServerFrame);
 		    	  pidServer = new PIDServer(pidServerFrame);
+		    	  updateServer = new UpdateServer(pidServerFrame);
+		    	  
 		    	  pidServerController.setServer(pidServer);
+		    	  pidServerController.setUpdateServer(updateServer);
+		    	  
 		  		  singleServerPool.execute(pidServer);
+		  		  singleUpdaterPool.execute(updateServer);
+		  		
 		  		  pidServerFrame.setVisible(true);
 		      }
 		    });
@@ -39,7 +49,9 @@ public class Main {
 		pidServerFrame.setVisible(false);
 		pidServerFrame.dispose();
 		pidServer.active = false;
-		shutdownAndAwaitTermination(singleServerPool);
+		updateServer.active = false;
+		
+		//shutdownAndAwaitTermination(singleServerPool);
 		System.exit(0);
 	}
 	static void shutdownAndAwaitTermination(ExecutorService pool) {

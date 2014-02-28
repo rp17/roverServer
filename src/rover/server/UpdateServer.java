@@ -14,9 +14,9 @@ import java.net.DatagramPacket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-public class PIDServer implements Runnable {
+public class UpdateServer implements Runnable {
 	public volatile boolean active = true;
-	private static final int PORT = 5000;      // for this server
+	private static final int PORT = 5001;      // for this server
 	
 	private static final int BUFSIZE = 1024;   // max size of a message
 	
@@ -25,9 +25,8 @@ public class PIDServer implements Runnable {
 	InetAddress clientAddr = null;
 	int clientPort = 0;
 	private DatagramSocket serverSock;
-
 	
-	public PIDServer(final PidServerFrame frame) {
+	public UpdateServer(final PidServerFrame frame) {
 	    try {  // try to create a socket for the server
 	        serverSock = new DatagramSocket(PORT);
 	        this.frame = frame;
@@ -80,7 +79,7 @@ public class PIDServer implements Runnable {
 			      }
 			});
 		    
-	        //System.out.println("Received: " + clientMsg);
+	        // System.out.println("Received: " + clientMsg);
 
 	        //processClient(clientMsg, clientAddr, clientPort);
 	      
@@ -90,55 +89,6 @@ public class PIDServer implements Runnable {
 	    }
 	  }  // end of waitForPackets()
 	  
-	  private void processClient(String msg, InetAddress addr, int port) {
-		  
-	  }
-	  	  
-	  private void sendMessage(String msg, InetAddress addr, int port)
-	  // send message back to the client
-	  {
-	    try {
-	      
-	    	byte[] msgToBytes = msg.getBytes();
-	    	DatagramPacket sendPacket = new DatagramPacket(msgToBytes, msg.length(), addr, port);
-	    	serverSock.send(sendPacket);
-	      
-	    } catch(IOException ioe) {  
-	    	System.out.println(ioe);  
-	    }
-	  } // end of sendMessage()
-	  
 	  public void closeServer() {active = false;}
-	  
-	 
-	  public void sendCmd(int cmd) {
-		  
-		  String msg = Integer.toString(cmd);
-		  
-		  if(clientAddr == null)
-			  System.out.println("Client address is null");
-		  else 
-			  sendMessage(msg, clientAddr, clientPort);
-	  }
-	  
-	  public void sendCmd(int cmd, int speed) {
-		  
-		  String msg = Integer.toString(cmd) + " " + Integer.toString(speed);
-		  
-		  if(clientAddr == null)
-			  System.out.println("Client address is null");
-		  else 
-			  sendMessage(msg, clientAddr, clientPort);
-	  }
-	  
-	  public void sendCmd(int cmd, int speed, int turn) {
-		  
-		  String msg = Integer.toString(cmd) + " " + Integer.toString(speed) + 
-				  " " + Integer.toString(turn) ;
-		  
-		  if(clientAddr == null)
-			  System.out.println("Client address is null");
-		  else 
-			  sendMessage(msg, clientAddr, clientPort);
-	  }
+	  	  
 }
