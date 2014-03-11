@@ -46,7 +46,6 @@ public class PidServerFrame extends JFrame implements ChangeListener {
     private final int steerMax = 90;
     private final int steerInit = 0;    //initial frames per second
     public static int currentSteerValue = 0;
-    private float origSteerProgress = steerInit;
     
 	// Boundaries for Speed Slider
     private final int speedMin = 0;
@@ -410,13 +409,10 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
         JSlider source = (JSlider)e.getSource();
         
-        if(source.getName().equals("steer")) {
-	        if (!source.getValueIsAdjusting()) {
-	        	
-	           // float steerPercentValue = (float) origSteerProgress - (float) Math.abs(sliderValue);
-	            
-	        	currentSteerValue = (int) source.getValue();
-	        	
+        if (!source.getValueIsAdjusting()) {
+        	if(source.getName().equals("steer")) {
+	        
+	        	currentSteerValue = (int) source.getValue();	
 	            int steerValue = Math.abs(currentSteerValue);
 	            
 	            if(currentSteerValue < -10) { // turn left
@@ -433,12 +429,9 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	            }
 	            // System.out.println("The slider value is " + sliderValue + " and % is " + steerPercentValue + " orig value " + origSteerProgress);
 	
-	            // Reset original slider value to the new slider value
-	            origSteerProgress = currentSteerValue;
-	        }
-	        
-        } else if(source.getName().equals("speed")) {
-        	currentSpeedValue = (int) source.getValue();
-        }
+	        } else if(source.getName().equals("speed")) {
+	        	currentSpeedValue = (int) source.getValue();
+	        }     
+        } 
 	}
 }
