@@ -16,20 +16,22 @@ import java.net.UnknownHostException;
 
 public class UpdateServer implements Runnable {
 	public volatile boolean active = true;
-	private static final int PORT = 5001;      // for this server
+	private static final int PORT = 49006;      // for this server
 	
 	private static final int BUFSIZE = 1024;   // max size of a message
 	
 	private  PidServerFrame frame;
 	private Client client;
-	InetAddress clientAddr = null;
-	int clientPort = 0;
+	private InetAddress clientAddr = null;
+	//int clientPort = 0;
 	private DatagramSocket serverSock;
+	private PIDServer pidServer;
 	
-	public UpdateServer(final PidServerFrame frame) {
+	public UpdateServer(final PidServerFrame frame, PIDServer pidServer) {
 	    try {  // try to create a socket for the server
 	        serverSock = new DatagramSocket(PORT);
 	        this.frame = frame;
+	        this.pidServer = pidServer;
 	      }
 	      catch(SocketException se)
 	      {  System.out.println(se);
@@ -65,14 +67,13 @@ public class UpdateServer implements Runnable {
 	        // extract client address, port, message
 	        if(clientAddr == null) {
 	        	clientAddr = receivePacket.getAddress();
-	        	clientPort = receivePacket.getPort();
-	        	System.out.println("client connected " + clientAddr);
+	        	//clientPort = receivePacket.getPort();
+	        	pidServer.setClientAddr(clientAddr);
+	        	System.out.println("Update Server: client connected " + clientAddr);
 	        }
 	        
 	        final String clientMsg = new String(receivePacket.getData());
-	        
-	        // receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength()
-	        
+	        	        
 		    SwingUtilities.invokeLater(new Runnable() {
 			      public void run() {
 			    	  frame.setCourseText(clientMsg);
@@ -80,8 +81,6 @@ public class UpdateServer implements Runnable {
 			});
 		    
 	        // System.out.println("Received: " + clientMsg);
-
-	        //processClient(clientMsg, clientAddr, clientPort);
 	      
 	    }
 	    catch(IOException ioe) {  

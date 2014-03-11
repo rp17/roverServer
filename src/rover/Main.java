@@ -32,14 +32,14 @@ public class Main {
 		    	  pidServerFrame = new PidServerFrame(pidServerController);
 		    	  pidServerController.setView(pidServerFrame);
 		    	  pidServer = new PIDServer(pidServerFrame);
-		    	  updateServer = new UpdateServer(pidServerFrame);
+		    	  updateServer = new UpdateServer(pidServerFrame, pidServer);
 		    	  
 		    	  pidServerController.setServer(pidServer);
 		    	  pidServerController.setUpdateServer(updateServer);
 		    	  
+		    	  singleUpdaterPool.execute(updateServer);
 		  		  singleServerPool.execute(pidServer);
-		  		  singleUpdaterPool.execute(updateServer);
-		  		
+		  		  
 		  		  pidServerFrame.setVisible(true);
 		      }
 		    });

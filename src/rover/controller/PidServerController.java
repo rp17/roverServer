@@ -19,9 +19,14 @@ public class PidServerController {
 	public void operation(String op) {
 		
 		// retrieve desired speed from rover.ui speed textbox
-		speed = Integer.parseInt(frame.getSpeedText());
-				
-		if(op == PidServerFrame.Close) {
+		speed = frame.getSpeedSlider();
+		
+		if(op == PidServerFrame.coursePID) {
+			if(remote) server.sendCmd(1, speed, 0, Integer.parseInt(frame.getDesiredAzimuthText()), Integer.parseInt(frame.getDurationText()));
+			// Duration dur = new Duration(frame);
+			// dur.start();
+		}		
+		else if(op == PidServerFrame.Close) {
 			server.closeServer();
 			updateServer.closeServer();
 			Main.shutdown();

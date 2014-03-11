@@ -16,14 +16,14 @@ import java.net.UnknownHostException;
 
 public class PIDServer implements Runnable {
 	public volatile boolean active = true;
-	private static final int PORT = 5000;      // for this server
+	private static final int PORT = 49005;      // for this server
 	
 	private static final int BUFSIZE = 1024;   // max size of a message
 	
 	private  PidServerFrame frame;
 	private Client client;
-	InetAddress clientAddr = null;
-	int clientPort = 0;
+	private volatile InetAddress clientAddr = null;
+	//int clientPort = 0;
 	private DatagramSocket serverSock;
 
 	
@@ -41,7 +41,10 @@ public class PIDServer implements Runnable {
 	        System.exit(1);
 	      }
 	}
-	
+	public void setClientAddr(InetAddress clientAddr){
+		this.clientAddr = clientAddr;
+		System.out.println("PIDServer: client address set " + clientAddr.toString());
+		}
 	public void run() {
 		while(active) {
 			waitForPackets();
@@ -66,8 +69,8 @@ public class PIDServer implements Runnable {
 	        // extract client address, port, message
 	        if(clientAddr == null) {
 	        	clientAddr = receivePacket.getAddress();
-	        	clientPort = receivePacket.getPort();
-	        	System.out.println("client connected " + clientAddr);
+	        	//clientPort = receivePacket.getPort();
+	        	System.out.println("PIDServer: client connected " + clientAddr);
 	        }
 	        
 	        final String clientMsg = new String(receivePacket.getData());
@@ -110,15 +113,15 @@ public class PIDServer implements Runnable {
 	  
 	  public void closeServer() {active = false;}
 	  
-	 
+	 /*
 	  public void sendCmd(int cmd) {
 		  
 		  String msg = Integer.toString(cmd);
 		  
 		  if(clientAddr == null)
-			  System.out.println("Client address is null");
+			  System.out.println("PIDServer: Client address is null");
 		  else 
-			  sendMessage(msg, clientAddr, clientPort);
+			  sendMessage(msg, clientAddr, PORT);
 	  }
 	  
 	  public void sendCmd(int cmd, int speed) {
@@ -126,9 +129,9 @@ public class PIDServer implements Runnable {
 		  String msg = Integer.toString(cmd) + " " + Integer.toString(speed);
 		  
 		  if(clientAddr == null)
-			  System.out.println("Client address is null");
+			  System.out.println("PIDServer: Client address is null");
 		  else 
-			  sendMessage(msg, clientAddr, clientPort);
+			  sendMessage(msg, clientAddr, PORT);
 	  }
 	  
 	  public void sendCmd(int cmd, int speed, int turn) {
@@ -137,8 +140,29 @@ public class PIDServer implements Runnable {
 				  " " + Integer.toString(turn) ;
 		  
 		  if(clientAddr == null)
+			  System.out.println("PIDServer: Client address is null");
+		  else 
+			  sendMessage(msg, clientAddr, PORT);
+	  }
+	  
+	  */
+	  
+	  
+	  public void sendCmd(int cmd, int...args) {
+		  
+		  
+		  
+		  String msg = Integer.toString(cmd);
+		  
+		  for (int arg : args) {
+		      msg += " " + Integer.toString(arg);
+		  }
+		  
+		  if(clientAddr == null)
 			  System.out.println("Client address is null");
 		  else 
-			  sendMessage(msg, clientAddr, clientPort);
+			  sendMessage(msg, clientAddr, PORT);
+		  
 	  }
+	  
 }

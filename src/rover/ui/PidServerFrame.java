@@ -41,13 +41,18 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	public final static String Remote = "Remote";
 	public final static String coursePID = "Start Course PID";
 	
-	// Boundaries for Slider
-    private final int FPS_MIN = -90;
-    private final int FPS_MAX = 90;
-    private final int FPS_INIT = 0;    //initial frames per second
-    public static int sliderValue = 0;
+	// Boundaries for Steer Slider
+    private final int steerMin = -90;
+    private final int steerMax = 90;
+    private final int steerInit = 0;    //initial frames per second
+    public static int currentSteerValue = 0;
+    private float origSteerProgress = steerInit;
     
-    private float origSteerProgress = FPS_INIT;
+	// Boundaries for Speed Slider
+    private final int speedMin = 0;
+    private final int speedMax = 300;
+    private final int speedInit = speedMax/2;    //initial frames per second
+    public  int currentSpeedValue = speedInit;
     
 	private Handler handler = new Handler();
 	private  JPanel topPanel;
@@ -56,12 +61,14 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	private	 JPanel motionPanel;
 	private  JLabel courseLabel;
 	private  JTextPane courseText;
-	private  JLabel speedLabel;
-	private  JTextPane speedText;
+	private  JLabel ratioLabel;
+	private  JTextPane ratioText;
 	private  JLabel desiredAzimuthLabel;
 	private  JTextPane desiredAzimuthText;
 	private  JLabel durationLabel;
 	private  JTextPane durationText;
+	private  JLabel speedLabel;
+	private  JLabel steerLabel;
 	
 	
 	private  JButton stopButton;
@@ -152,24 +159,44 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			bfDuration.fill = GridBagConstraints.HORIZONTAL;
 			bfDuration.insets = new Insets(0,5,15,15);
 			
+			GridBagConstraints blRatio = new GridBagConstraints();
+			blRatio.gridx = 0;
+			blRatio.gridy = 9;
+			blRatio.fill = GridBagConstraints.HORIZONTAL;
+			blRatio.insets = new Insets(0,3,15,15);
+			
+			GridBagConstraints bfRatio = new GridBagConstraints();
+			bfRatio.gridx = 1;
+			bfRatio.gridy = 9;
+			bfRatio.fill = GridBagConstraints.HORIZONTAL;
+			bfRatio.insets = new Insets(0,5,15,15);
+			
 			GridBagConstraints blSpeed = new GridBagConstraints();
 			blSpeed.gridx = 0;
-			blSpeed.gridy = 9;
+			blSpeed.gridy = 12;
 			blSpeed.fill = GridBagConstraints.HORIZONTAL;
 			blSpeed.insets = new Insets(0,3,15,15);
 			
-			GridBagConstraints bfSpeed = new GridBagConstraints();
-			bfSpeed.gridx = 1;
-			bfSpeed.gridy = 9;
-			bfSpeed.fill = GridBagConstraints.HORIZONTAL;
-			bfSpeed.insets = new Insets(0,5,15,15);
 			
-			// Slider Layout
-			GridBagConstraints bSlider = new GridBagConstraints();
-			bSlider.gridx = 0;
-			bSlider.gridy = 12;
-			bSlider.fill = GridBagConstraints.HORIZONTAL;
-			bSlider.insets = new Insets(10,0,10,0);
+			// Speed Slider Layout
+			GridBagConstraints speedSlider = new GridBagConstraints();
+			speedSlider.gridx = 0;
+			speedSlider.gridy = 15;
+			speedSlider.fill = GridBagConstraints.HORIZONTAL;
+			speedSlider.insets = new Insets(10,0,10,0);
+			
+			GridBagConstraints blSteer = new GridBagConstraints();
+			blSteer.gridx = 0;
+			blSteer.gridy = 18;
+			blSteer.fill = GridBagConstraints.HORIZONTAL;
+			blSteer.insets = new Insets(0,3,15,15);
+			
+			// Steer Slider Layout
+			GridBagConstraints steerSlider = new GridBagConstraints();
+			steerSlider.gridx = 0;
+			steerSlider.gridy = 21;
+			steerSlider.fill = GridBagConstraints.HORIZONTAL;
+			steerSlider.insets = new Insets(10,0,10,0);
 			
 			textPanel = new JPanel();
 			textPanel.setLayout(new GridBagLayout());
@@ -185,13 +212,13 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			courseText.setEditable(false);
 			
 			
-			speedLabel = new JLabel();
-			speedLabel.setText("Speed: ");
-			speedLabel.setPreferredSize(new Dimension(50, 20));
-			speedText = new JTextPane();
-			speedText.setText("2000");
-			speedText.setPreferredSize(new Dimension(50, 20));
-			speedText.setEditable(true);
+			ratioLabel = new JLabel();
+			ratioLabel.setText("Ratio: ");
+			ratioLabel.setPreferredSize(new Dimension(50, 20));
+			ratioText = new JTextPane();
+			// ratioText.setText("2000");
+			ratioText.setPreferredSize(new Dimension(50, 20));
+			ratioText.setEditable(false);
 			
 			desiredAzimuthLabel = new JLabel();
 			desiredAzimuthLabel.setText("Desired Course: ");
@@ -205,15 +232,26 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			durationLabel.setText("Duration: ");
 			durationLabel.setPreferredSize(new Dimension(50, 20));
 			durationText = new JTextPane();
+			durationText.setText("0");
 			durationText.setPreferredSize(new Dimension(50, 20));
-			durationText.setEditable(false);
+			durationText.setEditable(true);
+			
+			speedLabel = new JLabel();
+			speedLabel.setText("Speed");
+			speedLabel.setPreferredSize(new Dimension(50, 20));
+			
+			steerLabel = new JLabel();
+			steerLabel.setText("Steer");
+			steerLabel.setPreferredSize(new Dimension(50, 20));
+			
+		
 			
 			
 			textPanel.add(courseLabel, bl);
 			textPanel.add(courseText, bf);
 			
-			textPanel.add(speedLabel, blSpeed);
-			textPanel.add(speedText, bfSpeed);
+			textPanel.add(ratioLabel, blRatio);
+			textPanel.add(ratioText, bfRatio);
 			
 			textPanel.add(desiredAzimuthLabel, blDesiredAzimuth);
 			textPanel.add(desiredAzimuthText, bfDesiredAzimuth);
@@ -221,21 +259,38 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			textPanel.add(durationLabel, blDuration);
 			textPanel.add(durationText, bfDuration);
 			
-			 //Create the slider.
-	        JSlider framesPerSecond = new JSlider(JSlider.HORIZONTAL,
-	                                              FPS_MIN, FPS_MAX, FPS_INIT);
-	        framesPerSecond.setPreferredSize(new Dimension(500, 50));
-	        framesPerSecond.addChangeListener(this);
-	        framesPerSecond.setMajorTickSpacing(10);
-	        framesPerSecond.setMinorTickSpacing(1);
-	        framesPerSecond.setPaintTicks(true);
-	        framesPerSecond.setPaintLabels(true);
-	        //framesPerSecond.setBorder(
-	        //        BorderFactory.createEmptyBorder(0,0,0,0));
+			textPanel.add(speedLabel, blSpeed);
+			textPanel.add(steerLabel, blSteer);
+			
+			// Create the Speed Slider.
+	        JSlider speedFramesPerSecond = new JSlider(JSlider.HORIZONTAL,
+	                                              speedMin, speedMax, speedInit);
+	        speedFramesPerSecond.setName("speed");
+	        speedFramesPerSecond.setPreferredSize(new Dimension(900, 50));
+	        speedFramesPerSecond.addChangeListener(this);
+	        speedFramesPerSecond.setMajorTickSpacing(10);
+	        speedFramesPerSecond.setMinorTickSpacing(1);
+	        speedFramesPerSecond.setPaintTicks(true);
+	        speedFramesPerSecond.setPaintLabels(true);
 	        Font font = new Font("Serif", Font.ITALIC, 15);
-	        framesPerSecond.setFont(font);
+	        speedFramesPerSecond.setFont(font);
 	        
-	        textPanel.add(framesPerSecond, bSlider);
+	        textPanel.add(speedFramesPerSecond, speedSlider);
+	        
+	        
+	        
+			// Create the Speed Slider.
+	        JSlider steerFramesPerSecond = new JSlider(JSlider.HORIZONTAL,
+	                                              steerMin, steerMax, steerInit);
+	        steerFramesPerSecond.setName("steer");
+	        steerFramesPerSecond.setPreferredSize(new Dimension(500, 50));
+	        steerFramesPerSecond.addChangeListener(this);
+	        steerFramesPerSecond.setMajorTickSpacing(10);
+	        steerFramesPerSecond.setMinorTickSpacing(1);
+	        steerFramesPerSecond.setPaintTicks(true);
+	        steerFramesPerSecond.setPaintLabels(true);
+	        textPanel.add(steerFramesPerSecond, steerSlider);
+	        
 			
 		}
 		return textPanel;
@@ -246,13 +301,18 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			buttonPanel = new JPanel();
 			buttonPanel.setLayout(new GridBagLayout());
 			
-			GridBagConstraints rem = new GridBagConstraints();
-			rem.gridx = 0;
-			rem.gridy = 0;
+			
+			GridBagConstraints course = new GridBagConstraints();
+			course.gridx = 0;
+			course.gridy = 0;
 			
 			coursePIDButton = new JButton(coursePID);
 			coursePIDButton.addActionListener(handler);
-			buttonPanel.add(coursePIDButton, BorderLayout.CENTER);
+			buttonPanel.add(coursePIDButton, course);
+			
+			GridBagConstraints rem = new GridBagConstraints();
+			rem.gridx = 0;
+			rem.gridy = 1;
 			
 			remoteButton = new JButton(Remote);
 			remoteButton.addActionListener(handler);
@@ -261,7 +321,7 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			
 			GridBagConstraints man = new GridBagConstraints();
 			man.gridx = 0;
-			man.gridy = 1;
+			man.gridy = 2;
 			
 			manButton = new JButton(Manual);
 			manButton.addActionListener(handler);
@@ -293,13 +353,13 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			
 			GridBagConstraints motionP = new GridBagConstraints();
 			motionP.gridx = 0;
-			motionP.gridy = 2;
+			motionP.gridy = 3;
 			
 			buttonPanel.add(motionPanel, motionP);
 			
 			GridBagConstraints clButtonCtr = new GridBagConstraints();
 			clButtonCtr.gridx = 0;
-			clButtonCtr.gridy = 3;
+			clButtonCtr.gridy = 4;
 			
 			closeButton = new JButton(Close);
 			closeButton.addActionListener(handler);
@@ -312,13 +372,30 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 		courseText.setText(Integer.toString(course));
 	}
 	
-	public String getSpeedText() {
-		return speedText.getText();
+	public int getSpeedSlider() {
+		return currentSpeedValue * 10;
 	}
 	
 	public void setCourseText(String msg) {
 		courseText.setText(msg);
 	}
+	
+	public String getCourseText() {
+		return courseText.getText();
+	}
+	
+	public String getDesiredAzimuthText() {
+		return desiredAzimuthText.getText();
+	}
+	
+	public void setDurationText(String seconds) {
+		durationText.setText(seconds);
+	}
+	
+	public String getDurationText() {
+		return durationText.getText();
+	}
+	
 	public void showError(String msg) {
 		JOptionPane.showMessageDialog(this, msg);
 	}
@@ -328,38 +405,38 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			contr.operation(strCmd);
 		}
 	}
-	
-	private int speed;
-	
+		
 	@Override
 	public void stateChanged(ChangeEvent e) {
         JSlider source = (JSlider)e.getSource();
         
-        speed = Integer.parseInt(getSpeedText());
-        
-        if (!source.getValueIsAdjusting()) {
-            sliderValue = (int) source.getValue();
-                        
-           // float steerPercentValue = (float) origSteerProgress - (float) Math.abs(sliderValue);
-            
-            int steerValue = Math.abs(sliderValue);
-            
-            if(sliderValue < -10) { // turn left
-            	
-            	if(PidServerController.remote) PidServerController.server.sendCmd(7, speed, steerValue);
-            
-            } else if(sliderValue > 10) {	// turn right
-            	
-            	if(PidServerController.remote) PidServerController.server.sendCmd(6, speed, steerValue);
-            
-            } else {	// forward
-            	
-            	if(PidServerController.remote) PidServerController.server.sendCmd(1, speed);
-            }
-            // System.out.println("The slider value is " + sliderValue + " and % is " + steerPercentValue + " orig value " + origSteerProgress);
-
-            // Reset original slider value to the new slider value
-            origSteerProgress = sliderValue;
+        if(source.getName().equals("steer")) {
+	        if (!source.getValueIsAdjusting()) {
+	        	
+	           // float steerPercentValue = (float) origSteerProgress - (float) Math.abs(sliderValue);
+	            
+	            int steerValue = Math.abs(currentSteerValue);
+	            
+	            if(currentSteerValue < -10) { // turn left
+	            	
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(7, currentSpeedValue, steerValue);
+	            
+	            } else if(currentSteerValue > 10) {	// turn right
+	            	
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(6, currentSpeedValue, steerValue);
+	            
+	            } else {	// forward
+	            	
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(1, currentSpeedValue);
+	            }
+	            // System.out.println("The slider value is " + sliderValue + " and % is " + steerPercentValue + " orig value " + origSteerProgress);
+	
+	            // Reset original slider value to the new slider value
+	            origSteerProgress = currentSteerValue;
+	        }
+	        
+        } else if(source.getName().equals("speed")) {
+        	currentSpeedValue = (int) source.getValue();
         }
 	}
 }
