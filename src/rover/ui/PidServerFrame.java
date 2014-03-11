@@ -415,19 +415,21 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	        	
 	           // float steerPercentValue = (float) origSteerProgress - (float) Math.abs(sliderValue);
 	            
+	        	currentSteerValue = (int) source.getValue();
+	        	
 	            int steerValue = Math.abs(currentSteerValue);
 	            
 	            if(currentSteerValue < -10) { // turn left
 	            	
-	            	if(PidServerController.remote) PidServerController.server.sendCmd(7, currentSpeedValue, steerValue);
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(7, getSpeedSlider(), steerValue);
 	            
 	            } else if(currentSteerValue > 10) {	// turn right
 	            	
-	            	if(PidServerController.remote) PidServerController.server.sendCmd(6, currentSpeedValue, steerValue);
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(6, getSpeedSlider(), steerValue);
 	            
 	            } else {	// forward
 	            	
-	            	if(PidServerController.remote) PidServerController.server.sendCmd(1, currentSpeedValue);
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(1, getSpeedSlider());
 	            }
 	            // System.out.println("The slider value is " + sliderValue + " and % is " + steerPercentValue + " orig value " + origSteerProgress);
 	

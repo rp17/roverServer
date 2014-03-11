@@ -149,9 +149,7 @@ public class PIDServer implements Runnable {
 	  
 	  
 	  public void sendCmd(int cmd, int...args) {
-		  
-		  
-		  
+
 		  String msg = Integer.toString(cmd);
 		  
 		  for (int arg : args) {
