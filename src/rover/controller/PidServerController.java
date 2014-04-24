@@ -22,7 +22,7 @@ public class PidServerController {
 		speed = frame.getSpeedSlider();
 		
 		if(op == PidServerFrame.coursePID) {
-			if(remote) server.sendCmd(1, speed, 0, Integer.parseInt(frame.getDesiredAzimuthText()), Integer.parseInt(frame.getDurationText()));
+			if(remote) server.sendCmd(Commands.TIMEDPID, speed, 0, Integer.parseInt(frame.getDesiredAzimuthText()), Integer.parseInt(frame.getDurationText()));
 			// Duration dur = new Duration(frame);
 			// dur.start();
 		}		
@@ -32,27 +32,27 @@ public class PidServerController {
 			Main.shutdown();
 		}
 		else if(op == PidServerFrame.Remote) {
-			server.sendCmd(0);
+			server.sendCmd(Commands.NOCMD);
 			remote = true;
 		}
 		else if(op == PidServerFrame.Manual) {
-			server.sendCmd(-1);
+			server.sendCmd(Commands.MANUAL);
 			remote = false;
 		}
 		else if(op == PidServerFrame.Forward) {
-			if(remote) server.sendCmd(1, speed);
+			if(remote) server.sendCmd(Commands.FORWARD, speed);
 		}
 		else if(op == PidServerFrame.Backward) {
-			if(remote) server.sendCmd(2, speed);
+			if(remote) server.sendCmd(Commands.BACKWARD, speed);
 		}
 		else if(op == PidServerFrame.Left) {
-			if(remote) server.sendCmd(3, speed);
+			if(remote) server.sendCmd(Commands.LEFT, speed);
 		}
 		else if(op == PidServerFrame.Right) {
-			if(remote) server.sendCmd(4, speed);
+			if(remote) server.sendCmd(Commands.RIGHT, speed);
 		}
 		else if(op == PidServerFrame.Stop) {
-			if(remote) server.sendCmd(5);
+			if(remote) server.sendCmd(Commands.STOP);
 		}
 	}
 	

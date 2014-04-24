@@ -46,9 +46,9 @@ public class PIDServer implements Runnable {
 		System.out.println("PIDServer: client address set " + clientAddr.toString());
 		}
 	public void run() {
-		while(active) {
+		//while(active) {
 			waitForPackets();
-		}
+		//}
 		serverSock.close();
 	}
 	
@@ -73,16 +73,16 @@ public class PIDServer implements Runnable {
 	        	System.out.println("PIDServer: client connected " + clientAddr);
 	        }
 	        
-	        final String clientMsg = new String(receivePacket.getData());
+	        //final String clientMsg = new String(receivePacket.getData());
 	        
 	        // receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength()
-	        
+	        /*
 		    SwingUtilities.invokeLater(new Runnable() {
 			      public void run() {
 			    	  frame.setCourseText(clientMsg);
 			      }
 			});
-		    
+		    */
 	        //System.out.println("Received: " + clientMsg);
 
 	        //processClient(clientMsg, clientAddr, clientPort);
