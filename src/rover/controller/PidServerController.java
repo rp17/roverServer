@@ -22,7 +22,7 @@ public class PidServerController {
 		speed = frame.getSpeedSlider();
 		
 		if(op == PidServerFrame.coursePID) {
-			if(remote) server.sendCmd(1, speed, 0, Integer.parseInt(frame.getDesiredAzimuthText()), Integer.parseInt(frame.getDurationText()));
+			if(remote) server.sendCmd(8, speed, 0, Integer.parseInt(frame.getDesiredAzimuthText()), Integer.parseInt(frame.getDurationText()));
 			// Duration dur = new Duration(frame);
 			// dur.start();
 		}		
