@@ -1,5 +1,6 @@
 package rover;
 
+import rover.camera.cam_thread_UDP;
 import rover.controller.PidServerController;
 import rover.server.PIDServer;
 import rover.server.UpdateServer;
@@ -7,20 +8,26 @@ import rover.ui.PidServerFrame;
 
 import javax.swing.SwingUtilities;
 
+import org.newdawn.slick.AppGameContainer;
+import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.state.StateBasedGame;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
-public class Main {
+public class Main 
+{
 	static PidServerController pidServerController;
 	static PIDServer pidServer;
 	static UpdateServer updateServer;
 	static PidServerFrame pidServerFrame;
 	private static final ExecutorService singleServerPool = Executors.newSingleThreadExecutor();
 	private static final ExecutorService singleUpdaterPool = Executors.newSingleThreadExecutor();
-
+	
 	/**
 	 * @param args
 	 */
@@ -41,11 +48,25 @@ public class Main {
 		  		  singleServerPool.execute(pidServer);
 		  		  
 		  		  pidServerFrame.setVisible(true);
+		  		  pidServerFrame.f.setVisible(true);
+		  		  
 		      }
 		    });
+	    
+	    
+	    SwingUtilities.invokeLater(new Runnable() {
+		      public void run() {
+		  // Android Camera Initialization
+		    	  cam_thread_UDP cam_thread = new cam_thread_UDP(); 
+		}
+	    });
+	    
 	}
 
 	public static void shutdown(){
+		pidServerFrame.f.setVisible(false);
+		pidServerFrame.f.dispose();
+		
 		pidServerFrame.setVisible(false);
 		pidServerFrame.dispose();
 		pidServer.active = false;
