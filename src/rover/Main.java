@@ -1,29 +1,22 @@
 package rover;
 
-import rover.camera.cam_thread_UDP;
 import rover.controller.PidServerController;
-import rover.server.PIDServer;
-import rover.server.UpdateServer;
 import rover.ui.PidServerFrame;
+import rover.websocket.PCCamera;
+import rover.websocket.PCCommand;
+import rover.websocket.PCUpdater;
 
 import javax.swing.SwingUtilities;
-
-import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.state.StateBasedGame;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.Condition;
 
 public class Main 
 {
 	static PidServerController pidServerController;
-	static PIDServer pidServer;
-	static UpdateServer updateServer;
+	static PCCommand command;
+	static PCUpdater update;
 	static PidServerFrame pidServerFrame;
 	private static final ExecutorService singleServerPool = Executors.newSingleThreadExecutor();
 	private static final ExecutorService singleUpdaterPool = Executors.newSingleThreadExecutor();
@@ -38,14 +31,13 @@ public class Main
 		      public void run() {
 		    	  pidServerFrame = new PidServerFrame(pidServerController);
 		    	  pidServerController.setView(pidServerFrame);
-		    	  pidServer = new PIDServer(pidServerFrame);
-		    	  updateServer = new UpdateServer(pidServerFrame, pidServer);
+		    	  command = new PCCommand(pidServerFrame);
+		    	  update = new PCUpdater(pidServerFrame);
 		    	  
-		    	  pidServerController.setServer(pidServer);
-		    	  pidServerController.setUpdateServer(updateServer);
+		    	  pidServerController.setServer(command);
 		    	  
-		    	  singleUpdaterPool.execute(updateServer);
-		  		  singleServerPool.execute(pidServer);
+		    	  singleUpdaterPool.execute(update);
+		  		  singleServerPool.execute(command);
 		  		  
 		  		  pidServerFrame.setVisible(true);
 		  		  pidServerFrame.f.setVisible(true);
@@ -57,7 +49,7 @@ public class Main
 	    SwingUtilities.invokeLater(new Runnable() {
 		      public void run() {
 		  // Android Camera Initialization
-		    	  cam_thread_UDP cam_thread = new cam_thread_UDP(); 
+		    	  PCCamera cam_thread = new PCCamera(); 
 		}
 	    });
 	    
@@ -69,8 +61,7 @@ public class Main
 		
 		pidServerFrame.setVisible(false);
 		pidServerFrame.dispose();
-		pidServer.active = false;
-		updateServer.active = false;
+		// pidServer.active = false;
 		
 		//shutdownAndAwaitTermination(singleServerPool);
 		System.exit(0);

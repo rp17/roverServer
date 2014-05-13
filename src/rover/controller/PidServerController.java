@@ -1,20 +1,19 @@
 package rover.controller;
 
 import rover.Main;
-import rover.server.PIDServer;
-import rover.server.UpdateServer;
+//import rover.server.UpdateServer;
 import rover.ui.PidServerFrame;
+import rover.websocket.PCCommand;
 
 public class PidServerController {
 	private PidServerFrame frame;
-	public static PIDServer server;
-	public static UpdateServer updateServer;
+	private PCCommand server;
+
 	public static boolean remote = false;
 	private static int speed;
 	
 	public void setView(PidServerFrame frame) {this.frame = frame;}
-	public void setServer(PIDServer server) {this.server = server;}
-	public void setUpdateServer(UpdateServer server) {this.updateServer = server;}
+	public void setServer(PCCommand s) {this.server = s;}
 	
 	public void operation(String op) {
 		
@@ -27,8 +26,8 @@ public class PidServerController {
 			// dur.start();
 		}		
 		else if(op == PidServerFrame.Close) {
-			server.closeServer();
-			updateServer.closeServer();
+			//server.closeServer();
+			//updateServer.closeServer();
 			Main.shutdown();
 		}
 		else if(op == PidServerFrame.Remote) {
