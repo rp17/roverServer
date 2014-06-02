@@ -33,7 +33,15 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
+
 import rover.controller.PidServerController;
+import rover.controller.Commands;
 
 public class PidServerFrame extends JFrame implements ChangeListener {
 	
@@ -75,6 +83,8 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	private  JLabel speedLabel;
 	private  JLabel steerLabel;
 	
+	private  JLabel ipLabel;
+	private  JTextPane ipText;
 	
 	private  JButton stopButton;
 	private  JButton fwdButton;
@@ -86,6 +96,7 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	private  JButton closeButton;
 	private  JButton coursePIDButton;
 	
+
 	private final PidServerController contr;
 	
 	public static BufferedImage bImageFromConvert = null;
@@ -100,8 +111,8 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 		
         Toolkit toolkit =  Toolkit.getDefaultToolkit();
 		Dimension dim = toolkit.getScreenSize();
-		int x = (int) ((dim.getWidth() - f.getWidth()) * 0.5f);
-	    int y = (int) ((dim.getHeight() - f.getHeight()) * 0.5f);
+		int x = (int) ((dim.getWidth() - f.getWidth()) * 0.05f);
+	    int y = (int) ((dim.getHeight() - f.getHeight()) * 0.15f);
 	    f.setLocation(x, y);
 	    
 		f.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -117,9 +128,9 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 		});
 
 		this.getContentPane().add(getContent());
-		dim = toolkit.getScreenSize();
-		x = (int) ((dim.getWidth() - this.getWidth()) * 0.5f);
-	    y = (int) ((dim.getHeight() - this.getHeight()) * 0.5f);
+		//dim = toolkit.getScreenSize();
+		x = (int) ((dim.getWidth() - this.getWidth()) * 0.25f);
+	    y = (int) ((dim.getHeight() - this.getHeight()) * 0.15f);
 	    this.setLocation(x, y);
 		
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -220,7 +231,17 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			bfRatio.fill = GridBagConstraints.HORIZONTAL;
 			bfRatio.insets = new Insets(0,5,15,15);
 			
-			
+			GridBagConstraints blIP = new GridBagConstraints();
+			blIP.gridx = 0;
+			blIP.gridy = 10;
+			blIP.fill = GridBagConstraints.HORIZONTAL;
+			blIP.insets = new Insets(0,3,15,15);
+
+			GridBagConstraints bfIP = new GridBagConstraints();
+			bfIP.gridx = 1;
+			bfIP.gridy = 10;
+			bfIP.fill = GridBagConstraints.HORIZONTAL;
+			bfIP.insets = new Insets(0,5,15,15);
 			// Speed Layout
 			
 			GridBagConstraints blSpeed = new GridBagConstraints();
@@ -295,6 +316,19 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			durationText.setPreferredSize(new Dimension(50, 20));
 			durationText.setEditable(true);
 			
+			ipLabel = new JLabel();
+			ipLabel.setText("IP address: ");
+			ipLabel.setPreferredSize(new Dimension(50, 20));
+			ipText = new JTextPane();
+			try {
+				ipText.setText(getIP());
+			}
+			catch(SocketException ex) {
+				ipText.setText("No IP: socket exception");
+			}
+			ipText.setPreferredSize(new Dimension(100, 20));
+			ipText.setEditable(false);
+			
 			// Speed Label
 			speedLabel = new JLabel();
 			speedLabel.setText("Speed");
@@ -318,6 +352,9 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			
 			textPanel.add(durationLabel, blDuration);
 			textPanel.add(durationText, bfDuration);
+			
+			textPanel.add(ipLabel, blIP);
+			textPanel.add(ipText, bfIP);
 			
 			textPanel.add(speedLabel, blSpeed);
 			textPanel.add(steerLabel, blSteer);
@@ -464,7 +501,23 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 			contr.operation(strCmd);
 		}
 	}
-		
+	
+	public String getIP() throws SocketException {
+		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+		while (interfaces.hasMoreElements()){
+		    NetworkInterface current = interfaces.nextElement();
+		    if (!current.isUp() || current.isLoopback() || current.isVirtual()) continue;
+		    Enumeration<InetAddress> addresses = current.getInetAddresses();
+		    while (addresses.hasMoreElements()){
+		    	InetAddress currentAddr = addresses.nextElement();
+		    	if(currentAddr instanceof Inet4Address) {
+		    		return currentAddr.getHostAddress();
+		    	}
+		    }
+		}
+		return null;
+	}
+	
 	@Override
 	public void stateChanged(ChangeEvent e) {
         JSlider source = (JSlider)e.getSource();
@@ -477,15 +530,15 @@ public class PidServerFrame extends JFrame implements ChangeListener {
 	            
 	            if(currentSteerValue < -10) { // turn slight left
 	            	
-	            	if(PidServerController.remote) PidServerController.server.sendCmd(7, getSpeedSlider(), steerValue);
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(Commands.SLIGHTLEFT, getSpeedSlider(), steerValue);
 	            
 	            } else if(currentSteerValue > 10) {	// turn slight right
 	            	
-	            	if(PidServerController.remote) PidServerController.server.sendCmd(6, getSpeedSlider(), steerValue);
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(Commands.SLIGHTRIGHT, getSpeedSlider(), steerValue);
 	            
 	            } else {	// forward
 	            	
-	            	if(PidServerController.remote) PidServerController.server.sendCmd(1, getSpeedSlider());
+	            	if(PidServerController.remote) PidServerController.server.sendCmd(Commands.FORWARD, getSpeedSlider());
 	            }
 	            // System.out.println("The slider value is " + sliderValue + " and % is " + steerPercentValue + " orig value " + origSteerProgress);
 	
